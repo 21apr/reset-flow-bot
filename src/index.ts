@@ -1,20 +1,19 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { Telegraf, Markup, Context } from "telegraf";
-// import { message } from 'telegraf/filters'; // Для более точной типизации bot.on('text', ...)
+import { ParseMode } from "telegraf/typings/core/types/typegram";
 import dotenv from "dotenv";
 import { ITelegramUser } from "./mongoDB/interfaces/User.interface";
 import { findOrCreateUser } from "./mongoDB/service";
+import { CYCLES } from "./bot_features/breathing/cycles";
+import { handleBreathingCycleStart } from "./bot_features/bns_menu/breathing_btn/breathing_btn";
+import { handleDurationMenu } from "./bot_features/bns_menu/duration_btn";
 
 // Загрузка переменных окружения
 dotenv.config();
 
 // 1. Проверка и типизация переменных окружения
 // ---------------------------------------------
-
-// Проверяем наличие критически важных переменных и присваиваем им тип string.
-// Если переменная отсутствует, выбрасываем ошибку для немедленного останова.
-
 const MONGODB_TOKEN: string | undefined = process.env.MONGODB_TOKEN;
 if (!MONGODB_TOKEN) {
   throw new Error("❌ MONGODB_TOKEN не найден в переменных окружения.");
@@ -26,50 +25,85 @@ if (!BOT_TOKEN) {
 }
 
 const RENDER_URL: string | undefined = process.env.RENDER_URL;
-// RENDER_URL не критичен для запуска, но нужен для пинга
 if (!RENDER_URL) {
   console.warn("⚠️ RENDER_URL не найден. Пинг-функция не будет работать.");
 }
 
 // 2. Настройка подключения к MongoDB
 // ---------------------------------------------
-
 mongoose
   .connect(MONGODB_TOKEN)
   .then(() => {
     console.log("✅ Подключено к MongoDB");
   })
   .catch((err: Error) => {
-    // Указываем, что ошибка имеет тип Error
     console.error("❌ Ошибка подключения к MongoDB:", err.message);
-    // Не останавливаем программу, чтобы дать возможность работать хотя бы Express-серверу
   });
 
 // 3. Инициализация бота и сервера
 // ---------------------------------------------
 
-// Создаем экземпляр бота
-const bot = new Telegraf<Context>(BOT_TOKEN);
-// Context - базовый тип контекста Telegraf
-
-// Создаем экземпляр Express-сервера
+const bot = new Telegraf<Context>(BOT_TOKEN, {
+  // Убедитесь, что настройка parse_mode находится внутри объекта telegram
+  telegram: {
+    parse_mode: "HTML", // Должен быть 'HTML' или 'MarkdownV2'
+  },
+} as any);
 const app = express();
 
 // 4. Логика бота
 // ---------------------------------------------
 
-// bot.start((ctx) => {
-//   // Используем ctx.reply с обязательной типизацией Markup.keyboard
-//   const keyboard = Markup.keyboard([
-//     ["😌 Спокойно", "😩 Устал"],
-//     ["😠 Напряжён", "⚡ Вдохновлён"],
-//   ]).resize();
+bot.use((ctx, next) => {
+  const originalReply = ctx.reply.bind(ctx);
 
-//   ctx.reply(
-//     "Привет! 🌊 Я Reset Flow Bot.\nКак ты себя чувствуешь сейчас?",
-//     keyboard
-//   );
-// });
+  ctx.reply = (text, extra = {}) => {
+    if (typeof text === "string" && text.length > 0) {
+      const monospacedText = `<code>${text}</code>`;
+
+      // ❗ Главное изменение: добавляем parse_mode: 'HTML' в объект extra
+      const options = {
+        ...extra,
+        parse_mode: "HTML" as ParseMode,
+      };
+
+      // Вызываем оригинальный метод с явным режимом разметки
+      return originalReply(monospacedText, options);
+    }
+    return originalReply(text, extra);
+  };
+
+  return next();
+});
+
+/**
+ * Главное меню с выбором дыхательных циклов.
+ */
+
+export function sendBreathingMenu(
+  ctx: Context,
+  userName: string,
+  isNewUser: boolean = false
+) {
+  const greeting = isNewUser
+    ? `🧘‍♂️ Добро пожаловать, ${userName}!\nЯ Reset Flow Bot, твой личный тренер по дыханию. Выбери практику, чтобы начать.`
+    : `🧘‍♂️ С возвращением, ${userName}!\nВыбери практику, чтобы продолжить тренировку:`;
+
+  // 🚀 ГЕНЕРАЦИЯ КНОПОК В ОДИН ПЛОСКИЙ МАССИВ
+  const flatCycleButtons = CYCLES.map((cycle, index) => {
+    const callbackData = `select_cycle_${index}`;
+    // Возвращаем просто объект кнопки, а не массив с одной кнопкой
+    return Markup.button.callback(cycle.name, callbackData);
+  });
+
+  ctx.reply(
+    greeting,
+    // 🚀 ИСПОЛЬЗУЕМ Markup.inlineKeyboard С ОПЦИЕЙ { columns: 2 }
+    Markup.inlineKeyboard(flatCycleButtons, { columns: 2 })
+  );
+}
+
+// --- Обработчик команды /start ---
 bot.start(async (ctx) => {
   // 1. Получаем данные пользователя
   const telegramUser: ITelegramUser = {
@@ -80,69 +114,46 @@ bot.start(async (ctx) => {
 
   try {
     // 2. Вызываем функцию Find or Create
-    const { user, isNewUser } = await findOrCreateUser(
-      telegramUser.id,
-      telegramUser
-    );
+    const { isNewUser } = await findOrCreateUser(telegramUser.id, telegramUser);
 
-    // 3. Логика ответа бота с проверкой isNewUser
-    const userName = user.firstName || "друг";
-
-    const replyText = isNewUser
-      ? `👋 Добро пожаловать, ${userName}! Рады видеть нового пользователя. Начнем знакомство.`
-      : `С возвращением, ${userName}! Кажется, ты уже знаешь, что делать.`;
-
-    ctx.reply(
-      replyText + "\nКак ты себя чувствуешь сейчас?",
-      Markup.keyboard([
-        ["😌 Спокойно", "😩 Устал"],
-        ["😠 Напряжён", "⚡ Вдохновлён"],
-      ]).resize()
-    );
+    // 3. Отправляем меню дыхания
+    sendBreathingMenu(ctx, telegramUser.first_name, isNewUser);
   } catch (error) {
     ctx.reply(
-      "Произошла ошибка при регистрации. Пожалуйста, попробуйте позже."
+      "Произошла ошибка при обработке данных пользователя. Пожалуйста, попробуйте позже."
     );
   }
 });
 
-// bot.hears - это частный случай bot.on('text')
-bot.hears("😌 Спокойно", (ctx) =>
-  ctx.reply(
-    "Отлично! Попробуй закрепить это состояние — сделай три глубоких вдоха и улыбнись 🙂"
-  )
-);
+// // --- Обработчик для кнопок (Запуск тренажера) ---
 
-bot.hears("😩 Устал", (ctx) =>
-  ctx.reply(
-    "Попробуй минуту просто посидеть, закрыв глаза. Пусть мысли идут как облака ☁️"
-  )
-);
+bot.action(/^select_cycle_(\d+)$/, handleDurationMenu);
+bot.action(/^start_cycle_(\d+)_(\d+)$/, handleBreathingCycleStart as any);
+bot.action("back_to_main_menu", async (ctx: Context) => {
+  await ctx.answerCbQuery("Возвращаемся к выбору практики...");
 
-bot.hears("😠 Напряжён", (ctx) =>
-  ctx.reply(
-    "Сожми кулаки, посчитай до пяти и отпусти. Пусть уйдёт всё лишнее 💨"
-  )
-);
+  // Удаляем кнопки из текущего сообщения
+  try {
+    await ctx.editMessageReplyMarkup(undefined);
+  } catch (error) {
+    console.error("Не удалось удалить кнопки (Меню продолжительности):", error);
+  }
 
-bot.hears("⚡ Вдохновлён", (ctx) =>
-  ctx.reply(
-    "Поймай волну! Подумай, чему хочешь посвятить этот прилив энергии ⚡"
-  )
-);
+  // Снова вызываем функцию, которая отправляет основное меню выбора цикла
+  // Здесь вам понадобится userName. Если у вас его нет в ctx,
+  // возможно, придется получать его из ctx.from.first_name.
+  const userName = ctx.from?.first_name || "Пользователь";
+  sendBreathingMenu(ctx, userName);
+});
 
-// 5. Настройка Express-сервера
+// 5. Настройка Express-сервера (остается без изменений)
 // ---------------------------------------------
-
-// Явно типизируем req и res для Express
 app.get("/", (req: Request, res: Response) => {
   res.send("Reset Flow Bot работает 🌊");
 });
 
-// 6. Запуск сервера и бота
+// 6. Запуск сервера и бота (остается без изменений)
 // ---------------------------------------------
-
-// Запускаем бот
 bot
   .launch()
   .then(() => console.log("🚀 Reset Flow Bot запущен"))
@@ -150,8 +161,8 @@ bot
 
 // Функция пинга для Render
 if (RENDER_URL) {
-  // В Node.js fetch доступен, но если у вас старая версия, возможно, нужно установить 'node-fetch'
   setInterval(() => {
+    // Убедитесь, что 'fetch' доступен в вашей версии Node.js или используйте 'node-fetch'
     fetch(RENDER_URL)
       .then(() => console.log("🌐 Ping sent to keep alive"))
       .catch((err) => console.error("❌ Ошибка пинга:", err.message));

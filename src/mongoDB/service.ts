@@ -49,3 +49,33 @@ export async function findOrCreateUser(
     isNewUser: isNewUser,
   };
 }
+
+/**
+ * Атомарно увеличивает общее время дыхания пользователя.
+ * @param telegramId - ID пользователя Telegram.
+ * @param secondsToAdd - Количество секунд, которое нужно добавить.
+ */
+export async function addBreathingTime(
+  telegramId: string,
+  secondsToAdd: number
+): Promise<void> {
+  // Используем findOneAndUpdate с оператором $inc (increment)
+  await User.findOneAndUpdate(
+    { telegramId: telegramId },
+    { $inc: { totalBreathingSeconds: secondsToAdd } },
+    { new: true } // Опция new: true возвращает обновленный документ (необязательно)
+  ).exec();
+
+  // Примечание: $inc — это атомарная операция, она гарантирует, что
+  // даже при множестве одновременных запросов счетчик не будет потерян.
+}
+
+export async function getUserTotalBreathingTime(
+  telegramId: string
+): Promise<number> {
+  const user = await User.findOne(
+    { telegramId: telegramId },
+    "totalBreathingSeconds"
+  ).exec();
+  return user ? user.totalBreathingSeconds : 0;
+}

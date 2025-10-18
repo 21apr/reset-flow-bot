@@ -13,5 +13,6 @@ export interface IUser extends Document {
   username: string | null;
   firstName: string | null;
   registrationDate: Date;
+  totalBreathingSeconds: number; //Общее время дыхания в секундах
   // ... любые другие поля, которые вы добавите
 }

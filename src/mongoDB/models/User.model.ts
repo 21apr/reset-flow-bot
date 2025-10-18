@@ -22,10 +22,16 @@ const UserSchema: Schema = new Schema({
     type: Date,
     default: Date.now,
   },
+  totalBreathingSeconds: {
+    type: Number,
+    default: 0, // Важно: устанавливаем 0 для новых пользователей
+  },
 });
 
 // 2. Создание Модели с типизацией
 // Модель типизируется с помощью IUser (интерфейс документа)
-const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
+// const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
 
-export default User;
+// export default User;
+
+export default mongoose.model<IUser>("User", UserSchema);

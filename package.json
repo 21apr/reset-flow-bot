@@ -2,10 +2,13 @@
   "name": "reset-flow-bot",
   "version": "1.0.0",
   "main": "index.js",
+  "overrides": {
+    "whatwg-url": ">=11.0.0"
+  },
   "scripts": {
     "build": "node node_modules/typescript/bin/tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "nodemon src/index.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.1",
