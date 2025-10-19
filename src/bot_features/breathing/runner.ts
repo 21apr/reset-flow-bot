@@ -7,15 +7,52 @@ import {
 } from "../../mongoDB/service";
 import { formatAsCodeBlock } from "../../utils/format";
 
+// 5 лунных фаз для визуализации прогресса внутри цикла (от 0 до 4)
+const MOON_PHASES = ["🌕", "🌔", "🌓", "🌒", "🌑"];
+
 /**
- * Генерирует строку прогресса (например, [ 🌑🌘🌗🌖🌕 ]).
+ * Генерирует строку прогресса (например, [ "🌕", "🌖", "🌗", "🌘", "🌑"🌒
+ ]).
+ *
+ * Мы используем 5 эмодзи луны для отображения прогресса внутри текущего цикла
+ * (от 🌑 в начале цикла до 🌕 в конце).
+ *
+ * @param completedCycles - Количество полностью завершенных циклов.
+ * @param totalCycles - Общее количество запланированных циклов.
+ * @param currentPhaseIndex - Количество завершенных фаз в текущем цикле (от 0 до totalPhases).
+ * @param totalPhases - Общее количество фаз в цикле.
  */
-const getProgressString = (completed: number, totalCycles: number): string => {
-  const totalVisible = Math.min(totalCycles);
-  const completedStars = "🌕".repeat(Math.min(completed, totalVisible));
-  const remainingDots = "🌑".repeat(Math.max(0, totalVisible - completed));
-  // const ellipsis = totalCycles;
-  return `${completedStars}${remainingDots}`;
+const getProgressString = (
+  completedCycles: number,
+  totalCycles: number,
+  currentPhaseIndex: number,
+  totalPhases: number
+): string => {
+  // 1. Завершенные циклы: всегда 🌑
+  const completedStars = "🌑".repeat(completedCycles);
+
+  // 2. Текущий цикл: его прогресс
+  let currentCycleMoon = "";
+  if (completedCycles < totalCycles) {
+    // Вычисляем индекс эмодзи (от 0 до 4) на основе завершенных фаз.
+    // Если totalPhases = 4:
+    // 0 фаз завершено -> 0/4*4 = 0 (🌑)
+    // 1 фаза завершена -> 1/4*4 = 1 (🌘)
+    // 4 фазы завершено -> 4/4*4 = 4 (🌕)
+    const progressIndex = Math.min(
+      4,
+      Math.floor((currentPhaseIndex / totalPhases) * 4)
+    );
+    currentCycleMoon = MOON_PHASES[progressIndex];
+  }
+
+  // 3. Оставшиеся циклы: всегда 🌕.
+  // Вычитаем 1, если текущий цикл уже отображается (currentCycleMoon не пуст).
+  const remainingDots = "🌕".repeat(
+    Math.max(0, totalCycles - completedCycles - (currentCycleMoon ? 1 : 0))
+  );
+
+  return completedStars + currentCycleMoon + remainingDots;
 };
 
 /**
@@ -40,6 +77,7 @@ export async function runBreathingCycle(
   // Вычисление параметров
   const cycleDuration = cycle.phases.reduce((sum, p) => sum + p.duration, 0);
   const totalCycles = Math.ceil(totalDurationSeconds / cycleDuration);
+  const totalPhases = cycle.phases.length; // Общее количество фаз в цикле
 
   let currentCycleCount = 0; // Счетчик текущего цикла (начинается с 1)
   let completedCycles = 0; // Счетчик завершенных циклов (начинается с 0)
@@ -68,6 +106,10 @@ export async function runBreathingCycle(
   while (completedCycles < totalCycles) {
     currentCycleCount++;
 
+    // !!! НОВОЕ: Отслеживание числа ЗАВЕРШЕННЫХ фаз для визуализации луны.
+    // Начинается с 0 (ни одна фаза не завершена, луна 🌑).
+    let completedPhasesInCurrentCycle = 0;
+
     // Итерация по фазам цикла (Вдох, Пауза, Выдох...)
     for (const phase of cycle.phases) {
       // Если все циклы завершены, прерываем фазы
@@ -77,20 +119,24 @@ export async function runBreathingCycle(
       for (let i = 0; i < phase.duration; i++) {
         // Прогресс фазы: ▓▓▓░░ (визуализация времени в фазе)
         const phaseProgress =
-          "🟦".repeat(i + 1) + "⬜️".repeat(phase.duration - (i + 1));
+          "⬛".repeat(i + 1) + "⬜️".repeat(phase.duration - (i + 1));
 
         // Формируем текст
-        const statusText = `<code>${
-          cycle.name
-        } (Цикл ${currentCycleCount} из ${totalCycles})
+        const statusText = `<code>
+${cycle.name}
 ---------------------------------
 ${phase.emoji} <b>${phase.text}</b>:
-${phase.duration - i - 1} сек.
+${phase.duration - i} сек.
 ${phaseProgress}
 ---------------------------------
 Прогресс:
-${getProgressString(completedCycles, totalCycles)}
-                </code>`;
+${getProgressString(
+  completedCycles,
+  totalCycles,
+  completedPhasesInCurrentCycle, // Используем количество завершенных фаз
+  totalPhases
+)}
+            </code>`;
 
         // Редактируем сообщение
         await ctx.telegram
@@ -107,8 +153,11 @@ ${getProgressString(completedCycles, totalCycles)}
         // Ждем 1 секунду
         await sleep(1000);
       }
+      // !!! НОВОЕ: Фаза завершена, увеличиваем счетчик завершенных фаз.
+      // При следующей итерации `getProgressString` луна продвинется.
+      completedPhasesInCurrentCycle++;
     }
-    completedCycles++; // Увеличиваем счетчик завершенных циклов
+    completedCycles++; // Увеличиваем счетчик полностью завершенных циклов
   }
 
   // --- 4. ФАЗА: ЗАВЕРШЕНИЕ И СТАТИСТИКА ---

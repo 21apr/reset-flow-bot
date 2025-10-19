@@ -1,13 +1,14 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
-import { Telegraf, Markup, Context } from "telegraf";
+import { Telegraf, Context } from "telegraf";
 import { ParseMode } from "telegraf/typings/core/types/typegram";
 import dotenv from "dotenv";
 import { ITelegramUser } from "./mongoDB/interfaces/User.interface";
 import { findOrCreateUser } from "./mongoDB/service";
-import { CYCLES } from "./bot_features/breathing/cycles";
-import { handleBreathingCycleStart } from "./bot_features/bns_menu/breathing_btn/breathing_btn";
-import { handleDurationMenu } from "./bot_features/bns_menu/duration_btn";
+import { sendBreathingMenu } from "./bot_features/breathing/getBreathingKeyboard";
+import { handleArbitraryText } from "./bot_features/handlers/textHandler";
+import { handleDurationMenu } from "./bot_features/keyboards/getDurationKeyboard";
+import { handleBreathingCycleStart } from "./bot_features/keyboards/breathing_btn/breathing_btn";
 
 // Загрузка переменных окружения
 dotenv.config();
@@ -76,33 +77,6 @@ bot.use((ctx, next) => {
   return next();
 });
 
-/**
- * Главное меню с выбором дыхательных циклов.
- */
-
-export function sendBreathingMenu(
-  ctx: Context,
-  userName: string,
-  isNewUser: boolean = false
-) {
-  const greeting = isNewUser
-    ? `🧘‍♂️ Добро пожаловать, ${userName}!\nЯ Reset Flow Bot, твой личный тренер по дыханию. Выбери практику, чтобы начать.`
-    : `🧘‍♂️ С возвращением, ${userName}!\nВыбери практику, чтобы продолжить тренировку:`;
-
-  // 🚀 ГЕНЕРАЦИЯ КНОПОК В ОДИН ПЛОСКИЙ МАССИВ
-  const flatCycleButtons = CYCLES.map((cycle, index) => {
-    const callbackData = `select_cycle_${index}`;
-    // Возвращаем просто объект кнопки, а не массив с одной кнопкой
-    return Markup.button.callback(cycle.name, callbackData);
-  });
-
-  ctx.reply(
-    greeting,
-    // 🚀 ИСПОЛЬЗУЕМ Markup.inlineKeyboard С ОПЦИЕЙ { columns: 2 }
-    Markup.inlineKeyboard(flatCycleButtons, { columns: 2 })
-  );
-}
-
 // --- Обработчик команды /start ---
 bot.start(async (ctx) => {
   // 1. Получаем данные пользователя
@@ -116,8 +90,12 @@ bot.start(async (ctx) => {
     // 2. Вызываем функцию Find or Create
     const { isNewUser } = await findOrCreateUser(telegramUser.id, telegramUser);
 
+    const greeting = isNewUser
+      ? `🧘‍♂️ Добро пожаловать, ${telegramUser.first_name}!\nЯ Reset Flow Bot, твой личный тренер по дыханию. Выбери практику, чтобы начать.`
+      : `🧘‍♂️ С возвращением, ${telegramUser.first_name}!\nВыбери практику, чтобы продолжить тренировку:`;
+
     // 3. Отправляем меню дыхания
-    sendBreathingMenu(ctx, telegramUser.first_name, isNewUser);
+    ctx.reply(greeting, sendBreathingMenu());
   } catch (error) {
     ctx.reply(
       "Произошла ошибка при обработке данных пользователя. Пожалуйста, попробуйте позже."
@@ -138,12 +116,12 @@ bot.action("back_to_main_menu", async (ctx: Context) => {
   } catch (error) {
     console.error("Не удалось удалить кнопки (Меню продолжительности):", error);
   }
+  ctx.reply("Возвращаемся к выбору практики...", sendBreathingMenu());
+});
 
-  // Снова вызываем функцию, которая отправляет основное меню выбора цикла
-  // Здесь вам понадобится userName. Если у вас его нет в ctx,
-  // возможно, придется получать его из ctx.from.first_name.
-  const userName = ctx.from?.first_name || "Пользователь";
-  sendBreathingMenu(ctx, userName);
+bot.on("text", async (ctx) => {
+  // Внутри handleArbitraryText есть проверка, чтобы игнорировать команды
+  await handleArbitraryText(ctx);
 });
 
 // 5. Настройка Express-сервера (остается без изменений)

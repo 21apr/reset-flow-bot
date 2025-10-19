@@ -21,6 +21,7 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
   }
 
   const cycle = CYCLES[cycleIndex];
+
   const cycleName = cycle.name.split(" ")[0];
 
   // 2. Отвечаем на callback и удаляем старые кнопки
