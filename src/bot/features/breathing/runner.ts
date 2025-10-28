@@ -1,15 +1,15 @@
 import { Context } from "telegraf";
-import { sleep } from "../utils/sleep";
 import { Cycle } from "./cycles";
-import {
-  addBreathingTime,
-  getUserTotalBreathingTime,
-} from "../../mongoDB/service";
-import { formatAsCodeBlock } from "../../utils/format";
 import {
   completeCallbackAction,
   sendCycleMenu,
-} from "../utils/conversationTemplates";
+} from "../../utils/conversationTemplates";
+import { formatAsCodeBlock } from "../../../shared/utils/format";
+import { sleep } from "../../utils/sleep";
+import {
+  addBreathingTime,
+  getUserTotalBreathingTime,
+} from "../../../db/mongoDB/service";
 
 // 5 лунных фаз для визуализации прогресса внутри цикла (от 0 до 4)
 const MOON_PHASES = ["🌕", "🌔", "🌓", "🌒", "🌑"];

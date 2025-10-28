@@ -1,6 +1,6 @@
 import { Context } from "telegraf";
-import { CYCLES } from "../../breathing/cycles";
-import { runBreathingCycle } from "../../breathing/runner";
+import { CYCLES } from "../features/breathing/cycles";
+import { runBreathingCycle } from "../features/breathing/runner";
 
 type ExtendedActionContext = Context & { match: RegExpMatchArray };
 

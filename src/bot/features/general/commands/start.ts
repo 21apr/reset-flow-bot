@@ -1,5 +1,5 @@
 import { Context } from "telegraf";
-import { sendCycleMenu } from "../../utils/conversationTemplates";
+import { sendCycleMenu } from "../../../utils/conversationTemplates";
 
 export async function startHandler(ctx: Context, isNewUser: boolean) {
   const userName = ctx.from?.first_name || "друг";
