@@ -1,6 +1,7 @@
 import { Context, Markup } from "telegraf";
 import { CYCLES } from "../breathing/cycles";
 import { formatAsCodeBlock } from "../../utils/format";
+import { completeCallbackAction } from "../utils/conversationTemplates";
 
 // --- Добавьте этот тип для избежания ошибки TypeScript (Property 'match') ---
 type ExtendedActionContext = Context & {
@@ -24,17 +25,7 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
 
   const cycleName = cycle.name.split(" ")[0];
 
-  // 2. Отвечаем на callback и удаляем старые кнопки
-  await ctx.answerCbQuery(
-    `Выбран цикл "${cycleName}". Выберите продолжительность.`
-  );
-  try {
-    await ctx.editMessageReplyMarkup(undefined);
-  } catch (error) {
-    console.error("Не удалось удалить кнопки (Меню выбора цикла):", error);
-  }
-
-  // 3. Генерируем кнопки выбора продолжительности
+  // 2. Генерируем кнопки выбора продолжительности
   const durationButtons = AVAILABLE_DURATIONS.map((duration) => {
     const minutes = duration / 60;
 
@@ -66,7 +57,13 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
     Какую продолжительность вы выберете?`
   );
 
-  // 4. Отправляем новое сообщение с меню продолжительности
+  // 3. Отправляем новое сообщение с меню продолжительности
   // (Используем reply, так как editMessageReplyMarkup удалил кнопки в старом сообщении)
   ctx.reply(finalText, fullKeyboard);
+
+  // 4. Удаляем предыдущее сообщение с кнопками
+  await completeCallbackAction(
+    ctx,
+    `Выбран цикл "${cycleName}". Выберите продолжительность.`
+  );
 }

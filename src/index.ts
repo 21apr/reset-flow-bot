@@ -9,6 +9,8 @@ import { sendBreathingMenu } from "./bot_features/breathing/getBreathingKeyboard
 import { handleArbitraryText } from "./bot_features/handlers/textHandler";
 import { handleDurationMenu } from "./bot_features/keyboards/getDurationKeyboard";
 import { handleBreathingCycleStart } from "./bot_features/keyboards/breathing_btn/breathing_btn";
+import { startHandler } from "./bot_features/handlers/commands/start";
+import { handleBackToMainMenu } from "./bot_features/actions/menuNavigation";
 
 // Загрузка переменных окружения
 dotenv.config();
@@ -90,12 +92,8 @@ bot.start(async (ctx) => {
     // 2. Вызываем функцию Find or Create
     const { isNewUser } = await findOrCreateUser(telegramUser.id, telegramUser);
 
-    const greeting = isNewUser
-      ? `🧘‍♂️ Добро пожаловать, ${telegramUser.first_name}!\nЯ Reset Flow Bot, твой личный тренер по дыханию. Выбери практику, чтобы начать.`
-      : `🧘‍♂️ С возвращением, ${telegramUser.first_name}!\nВыбери практику, чтобы продолжить тренировку:`;
-
-    // 3. Отправляем меню дыхания
-    ctx.reply(greeting, sendBreathingMenu());
+    // // 3. Отправляем приветствие и меню дыхания
+    startHandler(ctx, isNewUser);
   } catch (error) {
     ctx.reply(
       "Произошла ошибка при обработке данных пользователя. Пожалуйста, попробуйте позже."
@@ -107,17 +105,8 @@ bot.start(async (ctx) => {
 
 bot.action(/^select_cycle_(\d+)$/, handleDurationMenu);
 bot.action(/^start_cycle_(\d+)_(\d+)$/, handleBreathingCycleStart as any);
-bot.action("back_to_main_menu", async (ctx: Context) => {
-  await ctx.answerCbQuery("Возвращаемся к выбору практики...");
 
-  // Удаляем кнопки из текущего сообщения
-  try {
-    await ctx.editMessageReplyMarkup(undefined);
-  } catch (error) {
-    console.error("Не удалось удалить кнопки (Меню продолжительности):", error);
-  }
-  ctx.reply("Возвращаемся к выбору практики...", sendBreathingMenu());
-});
+bot.action("back_to_main_menu", handleBackToMainMenu);
 
 bot.on("text", async (ctx) => {
   // Внутри handleArbitraryText есть проверка, чтобы игнорировать команды

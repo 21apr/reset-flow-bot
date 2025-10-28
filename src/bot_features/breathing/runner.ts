@@ -6,6 +6,10 @@ import {
   getUserTotalBreathingTime,
 } from "../../mongoDB/service";
 import { formatAsCodeBlock } from "../../utils/format";
+import {
+  completeCallbackAction,
+  sendCycleMenu,
+} from "../utils/conversationTemplates";
 
 // 5 лунных фаз для визуализации прогресса внутри цикла (от 0 до 4)
 const MOON_PHASES = ["🌕", "🌔", "🌓", "🌒", "🌑"];
@@ -86,6 +90,11 @@ export async function runBreathingCycle(
   let mainMessage = await ctx.reply(
     `🧘 Готовимся к упражнению "${cycle.name}"...`
   );
+  await completeCallbackAction(
+    ctx,
+    `🧘 Готовимся к упражнению "${cycle.name}"...`
+  );
+
   const mainMessageId = mainMessage.message_id;
 
   // --- 2. ФАЗА: ОБРАТНЫЙ ОТСЧЕТ ---
@@ -190,4 +199,14 @@ ${Math.floor(totalTimeEver / 60)} мин.
     finalStatsText,
     { parse_mode: "HTML" }
   );
+
+  // ОТПРАВЛЯЕМ НОВОЕ СООБЩЕНИЕ с меню циклов
+  const userName = ctx.from?.first_name || "друг";
+  const text = `
+  Отличная работа, ${userName}!
+  Когда будет необходимо, выбери новую дыхательную практику:
+      `;
+
+  // Используем наш унифицированный шаблон, который отправит текст + кнопки
+  await sendCycleMenu(ctx, text);
 }
