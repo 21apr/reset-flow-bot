@@ -1,6 +1,5 @@
 import { Markup } from "telegraf";
-// Предполагаемый импорт
-import { CYCLES } from "./cycles";
+import { CYCLES } from "../features/breathing/cycles";
 
 /**
  * Генерирует и возвращает объект Inline-клавиатуры для выбора дыхательных циклов.

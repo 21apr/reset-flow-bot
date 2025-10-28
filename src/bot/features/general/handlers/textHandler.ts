@@ -1,5 +1,5 @@
 import { Context } from "telegraf";
-import { sendBreathingMenu } from "../breathing/getBreathingKeyboard";
+import { sendCycleMenu } from "../../../utils/conversationTemplates";
 
 /**
  * Отправляет шутливый ответ, когда пользователь вводит произвольный текст,
@@ -24,6 +24,6 @@ export async function handleArbitraryText(ctx: Context) {
     `;
 
     // Отправляем сообщение с клавиатурой дыхательных циклов
-    await ctx.reply(replyText, sendBreathingMenu());
+    await sendCycleMenu(ctx, replyText);
   }
 }

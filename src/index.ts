@@ -3,14 +3,13 @@ import mongoose from "mongoose";
 import { Telegraf, Context } from "telegraf";
 import { ParseMode } from "telegraf/typings/core/types/typegram";
 import dotenv from "dotenv";
-import { ITelegramUser } from "./mongoDB/interfaces/User.interface";
-import { findOrCreateUser } from "./mongoDB/service";
-import { sendBreathingMenu } from "./bot_features/breathing/getBreathingKeyboard";
-import { handleArbitraryText } from "./bot_features/handlers/textHandler";
-import { handleDurationMenu } from "./bot_features/keyboards/getDurationKeyboard";
-import { handleBreathingCycleStart } from "./bot_features/keyboards/breathing_btn/breathing_btn";
-import { startHandler } from "./bot_features/handlers/commands/start";
-import { handleBackToMainMenu } from "./bot_features/actions/menuNavigation";
+import { ITelegramUser } from "./db/mongoDB/interfaces/User.interface";
+import { findOrCreateUser } from "./db/mongoDB/service";
+import { handleDurationMenu } from "./bot/keyboards/getDurationKeyboard";
+import { startHandler } from "./bot/features/general/commands/start";
+import { handleBackToMainMenu } from "./bot/features/breathing/actions/menuNavigation";
+import { handleBreathingCycleStart } from "./bot/keyboards/breathing_btn";
+import { handleArbitraryText } from "./bot/features/general/handlers/textHandler";
 
 // Загрузка переменных окружения
 dotenv.config();

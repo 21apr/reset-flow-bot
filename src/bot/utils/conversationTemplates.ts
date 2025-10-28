@@ -1,5 +1,5 @@
 import { Context } from "telegraf";
-import { sendBreathingMenu } from "../breathing/getBreathingKeyboard";
+import { sendBreathingMenu } from "../keyboards/getBreathingKeyboard";
 
 /**
  * Унифицированный шаблон для отправки меню выбора дыхательных циклов.

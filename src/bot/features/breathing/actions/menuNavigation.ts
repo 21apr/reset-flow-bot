@@ -1,9 +1,9 @@
 import { Context } from "telegraf";
-// Импортируем наш унифицированный шаблон
 import {
   completeCallbackAction,
   sendCycleMenu,
-} from "../utils/conversationTemplates";
+} from "../../../utils/conversationTemplates";
+// Импортируем наш унифицированный шаблон
 
 // Обработчик кнопки "Назад в главное меню"
 export async function handleBackToMainMenu(ctx: Context) {

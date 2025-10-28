@@ -1,7 +1,7 @@
 import { Context, Markup } from "telegraf";
-import { CYCLES } from "../breathing/cycles";
-import { formatAsCodeBlock } from "../../utils/format";
 import { completeCallbackAction } from "../utils/conversationTemplates";
+import { formatAsCodeBlock } from "../../shared/utils/format";
+import { CYCLES } from "../features/breathing/cycles";
 
 // --- Добавьте этот тип для избежания ошибки TypeScript (Property 'match') ---
 type ExtendedActionContext = Context & {
