@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import mongoose from "mongoose";
 import { Telegraf, Context } from "telegraf";
 import { ParseMode } from "telegraf/typings/core/types/typegram";
 import dotenv from "dotenv";
@@ -9,17 +8,19 @@ import { handleDurationMenu } from "./bot/keyboards/getDurationKeyboard";
 import { startHandler } from "./bot/features/general/commands/start";
 import { handleBackToMainMenu } from "./bot/features/breathing/actions/menuNavigation";
 import { handleBreathingCycleStart } from "./bot/keyboards/breathing_btn";
-import { handleArbitraryText } from "./bot/features/general/handlers/textHandler";
+import { GoogleGenAI } from "@google/genai";
+import { connectDB } from "./db/mongoDB/connectDB";
 
 // Загрузка переменных окружения
 dotenv.config();
 
+// Инициализация Gemini
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Вы можете выбрать модель, например, 'gemini-2.5-flash'
+const model = "gemini-2.5-flash";
+
 // 1. Проверка и типизация переменных окружения
 // ---------------------------------------------
-const MONGODB_TOKEN: string | undefined = process.env.MONGODB_TOKEN;
-if (!MONGODB_TOKEN) {
-  throw new Error("❌ MONGODB_TOKEN не найден в переменных окружения.");
-}
 
 const BOT_TOKEN: string | undefined = process.env.BOT_TOKEN;
 if (!BOT_TOKEN) {
@@ -31,19 +32,9 @@ if (!RENDER_URL) {
   console.warn("⚠️ RENDER_URL не найден. Пинг-функция не будет работать.");
 }
 
-// 2. Настройка подключения к MongoDB
-// ---------------------------------------------
-mongoose
-  .connect(MONGODB_TOKEN)
-  .then(() => {
-    console.log("✅ Подключено к MongoDB");
-  })
-  .catch((err: Error) => {
-    console.error("❌ Ошибка подключения к MongoDB:", err.message);
-  });
-
 // 3. Инициализация бота и сервера
 // ---------------------------------------------
+connectDB();
 
 const bot = new Telegraf<Context>(BOT_TOKEN, {
   // Убедитесь, что настройка parse_mode находится внутри объекта telegram
@@ -133,9 +124,38 @@ bot.action(/^start_cycle_(\d+)_(\d+)$/, handleBreathingCycleStart as any);
 
 bot.action("back_to_main_menu", handleBackToMainMenu);
 
+// bot.on("text", async (ctx) => {
+//   // Внутри handleArbitraryText есть проверка, чтобы игнорировать команды
+//   await handleArbitraryText(ctx);
+// });
+
+const activeChats = new Map(); // Key: chat_id (number), Value: ChatSession (from Gemini API)
+
 bot.on("text", async (ctx) => {
-  // Внутри handleArbitraryText есть проверка, чтобы игнорировать команды
-  await handleArbitraryText(ctx);
+  // ... (пропускаем команды) ...
+  const chatId = ctx.chat.id;
+  const userPrompt = ctx.message.text;
+
+  // 1. Получаем или создаем сессию чата
+  if (!activeChats.has(chatId)) {
+    const chat = ai.chats.create({
+      model: model,
+      config: {
+        systemInstruction:
+          "Ты — Reset Flow Bot, твоя задача — анализировать статистику пользователя по использоватнию бота дыхания, если такая передавалась отдельно. Если нет, просто болтать с пользователем. Будь эмпатичным, кратким и позитивным. Не вступай в длинные диалоги. Твой ответ должен быть простым не выходить за пределы 300 символов. Ты всегда отвечаешь на том же языке, на котором к тебе обращается пользователь.", // Ваш промпт
+      },
+    });
+    activeChats.set(chatId, chat);
+  }
+
+  const chatSession = activeChats.get(chatId);
+
+  // 2. Отправляем сообщение в сессию
+  await ctx.sendChatAction("typing");
+  const response = await chatSession.sendMessage({ message: userPrompt });
+
+  // 3. Отправляем ответ
+  ctx.reply(response.text);
 });
 
 // 5. Настройка Express-сервера (остается без изменений)
