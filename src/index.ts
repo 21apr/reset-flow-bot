@@ -52,6 +52,7 @@ const bot = new Telegraf<Context>(BOT_TOKEN, {
     parse_mode: "HTML", // Должен быть 'HTML' или 'MarkdownV2'
   },
 } as any);
+const feedbackLink = `https://t.me/LARINALAB`;
 const app = express();
 
 // 4. Логика бота
@@ -61,18 +62,23 @@ bot.use((ctx, next) => {
   const originalReply = ctx.reply.bind(ctx);
 
   ctx.reply = (text, extra = {}) => {
-    if (typeof text === "string" && text.length > 0) {
+    // Проверяем, содержит ли текст теги <a>, <pre> или <code> (чтобы избежать вложений)
+    const hasFormatting =
+      typeof text === "string" &&
+      (text.includes("<a") || text.includes("<pre") || text.includes("<code"));
+
+    if (typeof text === "string" && text.length > 0 && !hasFormatting) {
+      // ... (оборачиваем в <code> и добавляем parse_mode: "HTML")
       const monospacedText = `<code>${text}</code>`;
 
-      // ❗ Главное изменение: добавляем parse_mode: 'HTML' в объект extra
       const options = {
         ...extra,
         parse_mode: "HTML" as ParseMode,
       };
 
-      // Вызываем оригинальный метод с явным режимом разметки
       return originalReply(monospacedText, options);
     }
+
     return originalReply(text, extra);
   };
 
@@ -99,6 +105,26 @@ bot.start(async (ctx) => {
       "Произошла ошибка при обработке данных пользователя. Пожалуйста, попробуйте позже."
     );
   }
+});
+
+// Обработчик команды /feedback
+bot.command("feedback", async (ctx) => {
+  const messageText = `
+<b>💬 Обратная связь</b>
+
+Чтобы отправить мне личное сообщение, просто нажмите на эту ссылку:
+
+<a href="${feedbackLink}">Написать в личные сообщения</a>
+
+Буду рад вашим вопросам или предложениям!
+`;
+
+  await ctx.reply(messageText, {
+    parse_mode: "HTML", // Обязательно для форматирования ссылки
+    link_preview_options: {
+      is_disabled: true,
+    },
+  });
 });
 
 // // --- Обработчик для кнопок (Запуск тренажера) ---
