@@ -11,11 +11,14 @@ export async function findOrCreateUser(
 ): Promise<{ user: IUser; isNewUser: boolean }> {
   const query = { telegramId: telegramId };
 
+  const userLanguageCode = userData.language_code || "ru";
+
   const update = {
     $set: {
       // Используем $set для обновления полей
       username: userData.username || null,
       firstName: userData.first_name || null,
+      language: userLanguageCode,
     },
     $setOnInsert: {
       // Устанавливаем ТОЛЬКО при вставке

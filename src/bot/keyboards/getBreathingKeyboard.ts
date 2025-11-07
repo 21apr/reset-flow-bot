@@ -10,7 +10,7 @@ export function sendBreathingMenu(): ReturnType<typeof Markup.inlineKeyboard> {
   const flatCycleButtons = CYCLES.map((cycle, index) => {
     const callbackData = `select_cycle_${index}`;
     // Создаем кнопку-коллбэк
-    return Markup.button.callback(cycle.name, callbackData);
+    return Markup.button.callback(cycle.nameKey, callbackData);
   });
 
   // 2. 🚀 ФОРМИРОВАНИЕ КЛАВИАТУРЫ И ЕЕ ВОЗВРАТ

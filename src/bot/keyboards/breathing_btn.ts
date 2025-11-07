@@ -19,7 +19,7 @@ export async function handleBreathingCycleStart(ctx: ExtendedActionContext) {
   }
 
   const cycle = CYCLES[cycleIndex];
-  const cycleName = cycle.name.split(" ")[0]; // Например, "4-4-4-4"
+  const cycleName = cycle.nameKey.split(" ")[0]; // Например, "4-4-4-4"
 
   // 2. Отвечаем на callback
   await ctx.answerCbQuery(`Начинаем практику "${cycleName}"...`);

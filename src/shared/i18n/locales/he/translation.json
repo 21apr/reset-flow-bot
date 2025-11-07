@@ -1,0 +1,89 @@
+{
+  "menu": {
+    "relaxation": "הרפיה",
+    "anxiety_relief": "הפגת חרדה",
+    "concentration": "ריכוז",
+    "balance": "איזון",
+    "energy": "אנרגיה",
+    "irritation_release": "שחרור כעס",
+    "creative_flow": "זרימה יצירתית"
+  },
+  "cycle": {
+    "relaxation": {
+      "name": "הרפיה",
+      "description": "מסייע בשינה, מפחית חרדה ומרגיע את מערכת העצבים."
+    },
+    "anxiety_relief": {
+      "name": "הפגת חרדה",
+      "description": "נשיפה ארוכה משאיפה — מייצבת את הנשימה ומפחיתה מתח."
+    },
+    "concentration": {
+      "name": "ריכוז",
+      "description": "״נשימת ריבוע״ — מסייעת להתמקד ולשמור על רוגע."
+    },
+    "balance": {
+      "name": "איזון",
+      "description": "נשימה מאוזנת — מסנכרנת את הלב והמוח, מייצבת את הקצב."
+    },
+    "energy": {
+      "name": "אנרגיה",
+      "description": "נשיפות קצרות ופעילות — מפעילות את הגוף ומבהירות את התודעה."
+    },
+    "irritation_release": {
+      "name": "שחרור כעס",
+      "description": "מסייע להיפטר מכעס — נשיפה ארוכה עם צליל רך."
+    },
+    "creative_flow": {
+      "name": "זרימה יצירתית",
+      "description": "קצב רך למצב זרימה — שומר על קשב ללא מאמץ."
+    }
+  },
+  "phase": {
+    "in": "שאיפה",
+    "out": "נשיפה",
+    "hold": "עצירה (החזק)",
+    "pause_rest": "עצירה (מנוחה)",
+    "in_slow": "שאיפה (איטית)",
+    "hold_breath": "עצירה (החזק את הנשימה)",
+    "out_smooth": "נשיפה (חלקה מאוד)",
+    "in_nose": "שאיפה (דרך האף)",
+    "out_mouth": "נשיפה (דרך הפה, לאט)",
+    "out_sharp": "נשיפה (חדה דרך האף)",
+    "in_passive": "שאיפה (פסיבית)",
+    "out_sound": "נשיפה (עם צליל 'האאא')",
+    "hold_in": "עצירה (בסוף השאיפה)"
+  },
+  "commands": {
+    "start_desc": "הפעל את הבוט",
+    "help_desc": "הצג רשימת פקודות ועזרה",
+    "settings_desc": "פתח הגדרות בוט",
+    "feedback_desc": "שלח משוב"
+  },
+  "message": {
+    "preparing_exercise": "מתכוננים לתרגיל \"",
+    "starting_in": "מתחילים בעוד",
+    "exercise_complete": "התרגיל \"",
+    "great_job": "עבודה נהדרת",
+    "select_new_practice": "כשיהיה צורך, בחר תרגול נשימה חדש:"
+  },
+  "error": {
+    "sender_id_missing": "❌ runBreathingCycle: לא ניתן היה לקבל מזהה שולח (ctx.from).",
+    "edit_message": "שגיאה בעריכת ההודעה:",
+    "save_time": "❌ שגיאה בשמירת זמן עבור מזהה {id}:"
+  },
+  "unit": {
+    "sec": "שנ'",
+    "min": "דק'"
+  },
+  "label": {
+    "progress": "התקדמות"
+  },
+  "stat": {
+    "cycles_completed": "מחזורים שהושלמו",
+    "total_duration": "זמן תרגול כולל",
+    "total_time_title": "זמן נשימה כולל עם הבוט"
+  },
+  "placeholder": {
+    "friend": "חבר"
+  }
+}

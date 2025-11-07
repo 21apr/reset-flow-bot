@@ -26,6 +26,10 @@ const UserSchema: Schema = new Schema({
     type: Number,
     default: 0, // Важно: устанавливаем 0 для новых пользователей
   },
+  language: {
+    type: String,
+    default: "en",
+  },
 });
 
 // 2. Создание Модели с типизацией

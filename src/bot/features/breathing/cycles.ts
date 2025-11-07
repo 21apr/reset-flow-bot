@@ -1,116 +1,123 @@
+import { Context } from "telegraf";
+import { getTranslator } from "../../../shared/i18n/getTranslator";
+
 // Тип, описывающий одну фазу цикла
-export type BreathingPhase = "Вдох" | "Пауза_до" | "Выдох" | "Пауза_после";
+export type BreathingPhase = "Вдох" | "Пауза_до" | "Выдох" | "Пауза_после"; // Эти типы лучше оставить на английском в коде, если это технические идентификаторы
 
 // Интерфейс для хранения данных о конкретном цикле
 export interface Cycle {
-  name: string;
+  nameKey: string; // Ключ для имени (Расслабление, Энергия и т.д.)
   pattern: string;
-  description: string; // Короткое описание цели цикла
+  descriptionKey: string; // Ключ для описания
   phases: {
     type: BreathingPhase;
     duration: number; // Длительность в секундах
     emoji: string;
-    text: string;
+    textKey: string; // Ключ для текста фазы (ВДОХ, ПАУЗА и т.д.)
   }[];
 }
 
 /**
- * Заложенные шаблоны дыхательных циклов.
+ * Заложенные шаблоны дыхательных циклов (используют ключи i18n).
  */
 export const CYCLES: Cycle[] = [
   {
-    name: "Расслабление",
+    nameKey: "cycle.relaxation.name",
     pattern: "4-7-8",
-    description:
-      "Помогает уснуть, снижает тревожность, успокаивает нервную систему.",
+    descriptionKey: "cycle.relaxation.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", text: "ВДОХ (медленно)" },
+      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in_slow" },
       {
         type: "Пауза_до",
         duration: 7,
         emoji: "⏸️",
-        text: "ПАУЗА (держим дыхание)",
+        textKey: "phase.hold_breath",
       },
-      { type: "Выдох", duration: 8, emoji: "⬇️", text: "ВЫДОХ (очень плавно)" },
+      { type: "Выдох", duration: 8, emoji: "⬇️", textKey: "phase.out_smooth" },
     ],
   },
   {
-    name: "Снятие тревоги",
+    nameKey: "cycle.anxiety_relief.name",
     pattern: "4-0-6-0",
-    description:
-      "Выдох длиннее вдоха — стабилизирует дыхание и снижает стресс.",
+    descriptionKey: "cycle.anxiety_relief.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", text: "ВДОХ (через нос)" },
-      {
-        type: "Выдох",
-        duration: 6,
-        emoji: "⬇️",
-        text: "ВЫДОХ (через рот, медленно)",
-      },
+      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in_nose" },
+      { type: "Выдох", duration: 6, emoji: "⬇️", textKey: "phase.out_mouth" },
     ],
   },
   {
-    name: "Концентрация",
+    nameKey: "cycle.concentration.name",
     pattern: "4-4-4-4",
-    description:
-      "«Квадратное дыхание» — помогает сосредоточиться и сохранять спокойствие.",
+    descriptionKey: "cycle.concentration.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", text: "ВДОХ" },
-      { type: "Пауза_до", duration: 4, emoji: "⏸️", text: "ПАУЗА (держим)" },
-      { type: "Выдох", duration: 4, emoji: "⬇️", text: "ВЫДОХ" },
-      { type: "Пауза_после", duration: 4, emoji: "⏸️", text: "ПАУЗА (покой)" },
+      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in" },
+      { type: "Пауза_до", duration: 4, emoji: "⏸️", textKey: "phase.hold" },
+      { type: "Выдох", duration: 4, emoji: "⬇️", textKey: "phase.out" },
+      {
+        type: "Пауза_после",
+        duration: 4,
+        emoji: "⏸️",
+        textKey: "phase.pause_rest",
+      },
     ],
   },
   {
-    name: "Баланс",
+    nameKey: "cycle.balance.name",
     pattern: "5-0-5-0",
-    description:
-      "Ровное дыхание — гармонизирует сердце и мозг, стабилизирует ритм.",
+    descriptionKey: "cycle.balance.description",
     phases: [
-      { type: "Вдох", duration: 5, emoji: "⬆️", text: "ВДОХ" },
-      { type: "Выдох", duration: 5, emoji: "⬇️", text: "ВЫДОХ" },
+      { type: "Вдох", duration: 5, emoji: "⬆️", textKey: "phase.in" },
+      { type: "Выдох", duration: 5, emoji: "⬇️", textKey: "phase.out" },
     ],
   },
   {
-    name: "Энергия",
+    nameKey: "cycle.energy.name",
     pattern: "1-0-1-0",
-    description:
-      "Короткие активные выдохи — активируют тело и проясняют сознание.",
+    descriptionKey: "cycle.energy.description",
     phases: [
-      {
-        type: "Выдох",
-        duration: 1,
-        emoji: "💨",
-        text: "ВЫДОХ (резко через нос)",
-      },
-      { type: "Вдох", duration: 1, emoji: "⬆️", text: "ВДОХ (пассивно)" },
+      { type: "Выдох", duration: 1, emoji: "💨", textKey: "phase.out_sharp" },
+      { type: "Вдох", duration: 1, emoji: "⬆️", textKey: "phase.in_passive" },
     ],
   },
   {
-    name: "Сброс раздражения",
+    nameKey: "cycle.irritation_release.name",
     pattern: "4-0-8-0",
-    description:
-      "Помогает избавиться от гнева — длинный выдох с мягким звуком.",
+    descriptionKey: "cycle.irritation_release.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", text: "ВДОХ (через нос)" },
-      {
-        type: "Выдох",
-        duration: 8,
-        emoji: "🫧",
-        text: "ВЫДОХ (со звуком 'хааа')",
-      },
+      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in_nose" },
+      { type: "Выдох", duration: 8, emoji: "🫧", textKey: "phase.out_sound" },
     ],
   },
   {
-    name: "Творческий поток",
+    nameKey: "cycle.creative_flow.name",
     pattern: "4-2-6-2",
-    description:
-      "Мягкий ритм для состояния потока — поддерживает внимание без напряжения.",
+    descriptionKey: "cycle.creative_flow.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", text: "ВДОХ" },
-      { type: "Пауза_до", duration: 2, emoji: "⏸️", text: "ПАУЗА (на вдохе)" },
-      { type: "Выдох", duration: 6, emoji: "⬇️", text: "ВЫДОХ" },
-      { type: "Пауза_после", duration: 2, emoji: "⏸️", text: "ПАУЗА (отдых)" },
+      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in" },
+      { type: "Пауза_до", duration: 2, emoji: "⏸️", textKey: "phase.hold_in" },
+      { type: "Выдох", duration: 6, emoji: "⬇️", textKey: "phase.out" },
+      {
+        type: "Пауза_после",
+        duration: 2,
+        emoji: "⏸️",
+        textKey: "phase.pause_rest",
+      },
     ],
   },
 ];
+
+export function getLocalizedCycles(ctx: Context) {
+  const t = getTranslator(ctx);
+
+  return CYCLES.map((cycle) => ({
+    name: t(cycle.nameKey),
+    description: t(cycle.descriptionKey),
+    pattern: cycle.pattern,
+    phases: cycle.phases.map((phase) => ({
+      type: phase.type,
+      duration: phase.duration,
+      emoji: phase.emoji,
+      text: t(phase.textKey),
+    })),
+  }));
+}

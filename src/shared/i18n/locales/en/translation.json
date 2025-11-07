@@ -1,0 +1,89 @@
+{
+  "menu": {
+    "relaxation": "Relaxation",
+    "anxiety_relief": "Anxiety Relief",
+    "concentration": "Concentration",
+    "balance": "Balance",
+    "energy": "Energy",
+    "irritation_release": "Irritation Release",
+    "creative_flow": "Creative Flow"
+  },
+  "cycle": {
+    "relaxation": {
+      "name": "Relaxation",
+      "description": "Helps with sleep, reduces anxiety, and calms the nervous system."
+    },
+    "anxiety_relief": {
+      "name": "Anxiety Relief",
+      "description": "Exhale longer than inhale — stabilizes breathing and reduces stress."
+    },
+    "concentration": {
+      "name": "Concentration",
+      "description": "Box breathing — helps focus and maintain calmness."
+    },
+    "balance": {
+      "name": "Balance",
+      "description": "Even breathing — harmonizes the heart and mind, stabilizing the rhythm."
+    },
+    "energy": {
+      "name": "Energy",
+      "description": "Short, active exhales — activates the body and clears the mind."
+    },
+    "irritation_release": {
+      "name": "Irritation Release",
+      "description": "Helps release anger — long exhale with a soft sound."
+    },
+    "creative_flow": {
+      "name": "Creative Flow",
+      "description": "Soft rhythm for the flow state — maintains attention without tension."
+    }
+  },
+  "phase": {
+    "in": "IN",
+    "out": "OUT",
+    "hold": "HOLD",
+    "pause_rest": "PAUSE (Rest)",
+    "in_slow": "IN (Slowly)",
+    "hold_breath": "HOLD (Hold your breath)",
+    "out_smooth": "OUT (Very smoothly)",
+    "in_nose": "IN (Through the nose)",
+    "out_mouth": "OUT (Through the mouth, slowly)",
+    "out_sharp": "OUT (Sharp through the nose)",
+    "in_passive": "IN (Passively)",
+    "out_sound": "OUT (With a 'haaa' sound)",
+    "hold_in": "PAUSE (At the top of the inhale)"
+  },
+  "commands": {
+    "start_desc": "Start the bot",
+    "help_desc": "Show the list of commands and help",
+    "settings_desc": "Open bot settings",
+    "feedback_desc": "Send feedback"
+  },
+  "message": {
+    "preparing_exercise": "Preparing for exercise \"",
+    "starting_in": "Starting in",
+    "exercise_complete": "Exercise \"",
+    "great_job": "Great job",
+    "select_new_practice": "When needed, choose a new breathing practice:"
+  },
+  "error": {
+    "sender_id_missing": "❌ runBreathingCycle: Failed to get sender ID (ctx.from).",
+    "edit_message": "Error editing message:",
+    "save_time": "❌ Error saving time for ID {id}:"
+  },
+  "unit": {
+    "sec": "sec",
+    "min": "min"
+  },
+  "label": {
+    "progress": "Progress"
+  },
+  "stat": {
+    "cycles_completed": "Cycles completed",
+    "total_duration": "Total exercise time",
+    "total_time_title": "Total breathing time with bot"
+  },
+  "placeholder": {
+    "friend": "friend"
+  }
+}

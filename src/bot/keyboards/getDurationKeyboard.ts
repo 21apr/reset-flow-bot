@@ -23,7 +23,7 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
 
   const cycle = CYCLES[cycleIndex];
 
-  const cycleName = cycle.name.split(" ")[0];
+  const cycleName = cycle.nameKey.split(" ")[0];
 
   // 2. Генерируем кнопки выбора продолжительности
   const durationButtons = AVAILABLE_DURATIONS.map((duration) => {
@@ -49,10 +49,10 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
   ]);
 
   const finalText = formatAsCodeBlock(
-    `⏱️ ${cycle.name}.
+    `⏱️ ${cycle.nameKey}.
     ${cycle.pattern}
 
-    <b>${cycle.description}</b>
+    <b>${cycle.descriptionKey}</b>
 
     Какую продолжительность вы выберете?`
   );
