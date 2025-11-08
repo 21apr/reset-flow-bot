@@ -10,7 +10,7 @@ export async function feedbackHandler(ctx: MyContext) {
   const t = i18next.t.bind(i18next);
 
   // Передаем URL в качестве переменной 'accountUrl'
-  const messageText = t("commands.feedback", {
+  const messageText = t("message.feedback", {
     accountUrl: FEEDBACK_ACCOUNT_URL,
   });
 
