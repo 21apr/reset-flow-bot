@@ -15,11 +15,10 @@ import i18next from "../../../shared/i18n/i18n";
 const MOON_PHASES = ["🌕", "🌔", "🌓", "🌒", "🌑"];
 
 /**
- * Генерирует строку прогресса (например, [ "🌕", "🌖", "🌗", "🌘", "🌑"🌒
- * ]).
+ * Генерирует строку прогресса (например, [ "🌕","🌔", "🌓", "🌒", "🌑"]).
  *
  * Мы используем 5 эмодзи луны для отображения прогресса внутри текущего цикла
- * (от 🌑 в начале цикла до 🌕 в конце).
+ * (от 🌕 в начале цикла до 🌑 в конце).
  *
  * @param completedCycles - Количество полностью завершенных циклов.
  * @param totalCycles - Общее количество запланированных циклов.
@@ -38,20 +37,34 @@ const getProgressString = (
   // 2. Текущий цикл: его прогресс
   let currentCycleMoon = "";
   if (completedCycles < totalCycles) {
-    // Вычисляем индекс эмодзи (от 0 до 4) на основе завершенных фаз.
-    // Если totalPhases = 4:
-    // 0 фаз завершено -> 0/4*4 = 0 (🌑)
-    // 1 фаза завершена -> 1/4*4 = 1 (🌘)
-    // 4 фазы завершено -> 4/4*4 = 4 (🌕)
-    const progressIndex = Math.min(
-      4,
-      Math.floor((currentPhaseIndex / totalPhases) * 4)
-    );
+    let progressIndex: number;
+
+    // --- ИСПРАВЛЕНИЕ ДЛЯ ТРЕХФАЗНЫХ ЦИКЛОВ ---
+    if (totalPhases === 3) {
+      // Желаемая последовательность: "🌕", "🌔", "🌒", "🌑"
+      // Индексы: 0, 1, 3, 4
+      // currentPhaseIndex: 0 -> 0 (🌕)
+      // currentPhaseIndex: 1 -> 1 (🌔)
+      // currentPhaseIndex: 2 -> 3 (🌒)
+      // currentPhaseIndex: 3 -> 4 (🌑) (но цикл завершен, поэтому это не произойдет)
+      const mapForThreePhases = [0, 1, 3, 4]; // Индексы MOON_PHASES для фаз 0, 1, 2, 3
+      // Используем индекс 3 (4) для всех случаев, когда фаз > 2
+      progressIndex = mapForThreePhases[Math.min(currentPhaseIndex, 3)];
+    } else {
+      // --- СТАНДАРТНАЯ ЛОГИКА ДЛЯ ВСЕХ ОСТАЛЬНЫХ ЦИКЛОВ ---
+      // Вычисляем индекс эмодзи (от 0 до 4) на основе завершенных фаз.
+      // Старая формула, которая работает для 2 и 4 фаз:
+      progressIndex = Math.min(
+        4,
+        Math.floor((currentPhaseIndex / totalPhases) * 4)
+      );
+    }
+
     currentCycleMoon = MOON_PHASES[progressIndex];
   }
 
   // 3. Оставшиеся циклы: всегда 🌕.
-  // Вычитаем 1, если текущий цикл уже отображается (currentCycleMoon не пуст).
+  // ... (остальной код функции без изменений)
   const remainingDots = "🌕".repeat(
     Math.max(0, totalCycles - completedCycles - (currentCycleMoon ? 1 : 0))
   );
@@ -131,9 +144,7 @@ export async function runBreathingCycle(
       // Запускаем таймер фазы
       for (let i = 0; i <= phase.duration; i++) {
         // Прогресс фазы: ▓▓▓░░ (визуализация времени в фазе)
-        const phaseProgress =
-          // "⬛".repeat(i + 1) + "⬜️".repeat(phase.duration - (i + 1));
-          "⬛".repeat(i) + "⬜️".repeat(phase.duration - i);
+        const phaseProgress = "⬛".repeat(i) + "⬜️".repeat(phase.duration - i);
 
         // Формируем текст
         // Все строки теперь используют ключи (cycle.nameKey, phase.textKey)
@@ -165,8 +176,13 @@ ${getProgressString(
             }
           });
 
-        // Ждем 1 секунду
-        await sleep(1000);
+        // Ждем 1 секунду ТОЛЬКО если это НЕ последняя итерация
+        // i == phase.duration — это последняя итерация, где remainingTime = 0.
+        if (i < phase.duration) {
+          await sleep(1000);
+        }
+        // Если i == phase.duration, мы выходим из этого цикла for и сразу переходим
+        // к обновлению completedPhasesInCurrentCycle и следующей фазе/циклу.
       }
       // !!! НОВОЕ: Фаза завершена, увеличиваем счетчик завершенных фаз.
       // При следующей итерации `getProgressString` луна продвинется.
