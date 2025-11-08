@@ -1,0 +1,100 @@
+{
+  "menu": {
+    "relaxation": "Relaxation",
+    "anxiety_relief": "Anxiety Relief",
+    "concentration": "Concentration",
+    "balance": "Balance",
+    "energy": "Energy",
+    "irritation_release": "Irritation Release",
+    "creative_flow": "Creative Flow",
+    "duration_minutes": "{{count}} min",
+    "duration_prompt": "⏱️ {{cycleName}}.\n    {{pattern}}\n\n    {{description}}\n\n    Which duration will you choose?"
+  },
+  "cycle": {
+    "relaxation": {
+      "name": "Relaxation",
+      "description": "Helps you fall asleep, reduces anxiety, calms the nervous system."
+    },
+    "anxiety_relief": {
+      "name": "Anxiety Relief",
+      "description": "Exhale is longer than inhale — stabilizes breathing and reduces stress."
+    },
+    "concentration": {
+      "name": "Concentration",
+      "description": "\"Box breathing\" — helps to focus and stay calm."
+    },
+    "balance": {
+      "name": "Balance",
+      "description": "Even breathing — harmonizes the heart and brain, stabilizes the rhythm."
+    },
+    "energy": {
+      "name": "Energy",
+      "description": "Short, active exhales — activate the body and clear the mind."
+    },
+    "irritation_release": {
+      "name": "Irritation Release",
+      "description": "Helps to get rid of anger — long exhale with a soft sound."
+    },
+    "creative_flow": {
+      "name": "Creative Flow",
+      "description": "A gentle rhythm for a flow state — supports attention without tension."
+    }
+  },
+  "phase": {
+    "in": "IN",
+    "out": "OUT",
+    "hold": "HOLD (hold)",
+    "pause_rest": "PAUSE (rest)",
+    "in_slow": "IN (slowly)",
+    "hold_breath": "HOLD (hold breath)",
+    "out_smooth": "OUT (very smoothly)",
+    "in_nose": "IN (through the nose)",
+    "out_mouth": "OUT (through the mouth, slowly)",
+    "out_sharp": "OUT (sharply through the nose)",
+    "in_passive": "IN (passively)",
+    "out_sound": "OUT (with 'haaa' sound)",
+    "hold_in": "HOLD (on inhale)"
+  },
+  "commands": {
+    "start_desc": "Start the bot",
+    "help_desc": "Show command list and help",
+    "settings_desc": "Open bot settings",
+    "feedback_desc": "Feedback"
+  },
+  "message": {
+    "preparing_exercise": "Preparing for the exercise \"",
+    "starting_in": "Starting in",
+    "exercise_complete": "Exercise \"",
+    "great_job": "Great job",
+    "select_new_practice": "When needed, select a new breathing practice:",
+    "cycle_selected": "Cycle \"{{cycleName}}\" selected. Choose duration.",
+    "feedback": "<b>💬 Feedback</b>\n\nTo send me a private message, just click on this link:\n\n<a href=\"{{accountUrl}}\">Write a private message</a>\n\nI look forward to your questions or suggestions!",
+    "greeting": {
+    "welcome_new": "🧘‍♂️ Welcome, {{userName}}!\nI am Reset Flow Bot, your personal breathing coach. Choose a practice to begin.",
+    "welcome_back": "🧘‍♂️ Welcome back, {{userName}}!\nChoose a practice to continue your training:"
+  }
+  },
+  "error": {
+    "sender_id_missing": "❌ runBreathingCycle: Failed to get sender ID (ctx.from).",
+    "edit_message": "Error editing message:",
+    "save_time": "❌ Error saving time for ID {id}:"
+  },
+  "unit": {
+    "sec": "sec",
+    "min": "min"
+  },
+  "label": {
+    "progress": "Progress"
+  },
+  "stat": {
+    "cycles_completed": "Cycles completed",
+    "total_duration": "Total exercise time",
+    "total_time_title": "Total breathing time with the bot"
+  },
+  "placeholder": {
+    "friend": "friend"
+  },
+  "button": {
+    "back": "⬅️ Back"
+  }
+}

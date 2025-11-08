@@ -1,0 +1,81 @@
+import { Markup } from "telegraf";
+import { completeCallbackAction } from "../utils/conversationTemplates";
+import { CYCLES } from "../features/breathing/cycles";
+import { MyContext } from "../features/general/types/types";
+import i18next from "../../shared/i18n/i18n";
+
+// --- Добавьте этот тип для избежания ошибки TypeScript (Property 'match') ---
+type ExtendedActionContext = MyContext & {
+  match: RegExpMatchArray;
+  callbackQuery: any;
+};
+// --------------------------------------------------------------------------
+
+// 💡 Набор стандартных продолжительностей (в секундах)
+const AVAILABLE_DURATIONS = [60, 120, 180, 300]; // 1, 2, 3, 5 минут
+
+export async function handleDurationMenu(ctx: ExtendedActionContext) {
+  const t = i18next.t.bind(i18next);
+  // 1. Извлекаем индекс цикла из колбэка
+  const cycleIndex = parseInt(ctx.match[1]);
+
+  if (cycleIndex >= CYCLES.length) {
+    return ctx.answerCbQuery("❌ Неверный цикл.");
+  }
+
+  const cycle = CYCLES[cycleIndex];
+
+  const translatedCycleName = t(cycle.nameKey);
+
+  // 2. Генерируем кнопки выбора продолжительности
+  const durationButtons = AVAILABLE_DURATIONS.map((duration) => {
+    const minutes = duration / 60;
+
+    // CALLBACK_DATA: start_cycle_ИНДЕКС_ПРОДОЛЖИТЕЛЬНОСТЬ
+    // Этот формат соответствует вашему старому регулярному выражению!
+    const callbackData = `start_cycle_${cycleIndex}_${duration}`;
+
+    // ⭐️ Переводим текст кнопки, используя minutes и интерполяцию
+    const buttonText = t("menu.duration_minutes", { count: minutes });
+    // В вашем i18n файле это может выглядеть как: "duration_minutes": "{{count}} мин"
+
+    return Markup.button.callback(buttonText, callbackData);
+  });
+
+  const backButton = Markup.button.callback(
+    t("button.back"),
+    "back_to_main_menu"
+  );
+
+  // 🚀 ОБЪЕДИНЯЕМ КНОПКИ:
+  // Мы хотим, чтобы кнопки продолжительности были в одном ряду, а "Назад" - в отдельном.
+  // Markup.inlineKeyboard принимает массив массивов.
+  // [durationButtons] - создает один ряд из всех кнопок продолжительности.
+  // [backButton] - создает отдельный ряд для кнопки "Назад".
+  const fullKeyboard = Markup.inlineKeyboard([
+    durationButtons, // Все кнопки продолжительности в один ряд
+    [backButton], // Кнопка "Назад" в отдельный ряд
+  ]);
+
+  const finalText =
+    // ⭐️ Используем переводы для всех частей
+    t("menu.duration_prompt", {
+      cycleName: translatedCycleName, // Переведенное имя цикла
+      pattern: cycle.pattern, // Паттерн, вероятно, не переводится
+      description: t(cycle.descriptionKey), // Переводим описание
+    });
+
+  // 3. Отправляем новое сообщение с меню продолжительности
+  // (Используем reply, так как editMessageReplyMarkup удалил кнопки в старом сообщении)
+  ctx.reply(finalText, fullKeyboard);
+
+  // 4. Удаляем предыдущее сообщение с кнопками
+  await completeCallbackAction(
+    ctx,
+    // ⭐️ Переводим сообщение для answerCbQuery
+    t("message.cycle_selected", {
+      cycleName: translatedCycleName,
+      replace: translatedCycleName,
+    })
+  );
+}
