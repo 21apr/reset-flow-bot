@@ -6,7 +6,9 @@
     "balance": "Баланс",
     "energy": "Энергия",
     "irritation_release": "Сброс раздражения",
-    "creative_flow": "Творческий поток"
+    "creative_flow": "Творческий поток",
+    "duration_minutes": "{{count}} мин",
+    "duration_prompt": "⏱️ {{cycleName}}.\n    {{pattern}}\n\n    {{description}}\n\n    Какую продолжительность вы выберете?"
   },
   "cycle": {
     "relaxation": {
@@ -64,7 +66,13 @@
     "starting_in": "Начинаем через",
     "exercise_complete": "Упражнение \"",
     "great_job": "Отличная работа",
-    "select_new_practice": "Когда будет необходимо, выбери новую дыхательную практику:"
+    "select_new_practice": "Когда будет необходимо, выбери новую дыхательную практику:",
+    "cycle_selected": "Выбран цикл \"{{cycleName}}\". Выберите продолжительность.",
+    "feedback": "<b>💬 Обратная связь</b>\n\nЧтобы отправить мне личное сообщение, просто нажмите на эту ссылку:\n\n<a href=\"{{accountUrl}}\">Написать в личные сообщения</a>\n\nБуду рад вашим вопросам или предложениям!",
+    "greeting": {
+    "welcome_new": "🧘‍♂️ Добро пожаловать, {{userName}}!\nЯ Reset Flow Bot, твой личный тренер по дыханию. Выбери практику, чтобы начать.",
+    "welcome_back": "🧘‍♂️ С возвращением, {{userName}}!\nВыбери практику, чтобы продолжить тренировку:"
+  }
   },
   "error": {
     "sender_id_missing": "❌ runBreathingCycle: Не удалось получить ID отправителя (ctx.from).",
@@ -85,5 +93,8 @@
   },
   "placeholder": {
     "friend": "друг"
+  },
+  "button": {
+    "back": "⬅️ Назад"
   }
 }

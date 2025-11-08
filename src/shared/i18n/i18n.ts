@@ -11,7 +11,7 @@ export async function initI18n() {
       ),
     },
     fallbackLng: "en",
-    preload: ["en", "ru", "he"],
+    preload: ["en", "ru"],
     interpolation: {
       escapeValue: false,
     },

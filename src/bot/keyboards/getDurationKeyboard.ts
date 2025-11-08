@@ -1,10 +1,11 @@
-import { Context, Markup } from "telegraf";
+import { Markup } from "telegraf";
 import { completeCallbackAction } from "../utils/conversationTemplates";
-import { formatAsCodeBlock } from "../../shared/utils/format";
 import { CYCLES } from "../features/breathing/cycles";
+import { MyContext } from "../features/general/types/types";
+import i18next from "../../shared/i18n/i18n";
 
 // --- Добавьте этот тип для избежания ошибки TypeScript (Property 'match') ---
-type ExtendedActionContext = Context & {
+type ExtendedActionContext = MyContext & {
   match: RegExpMatchArray;
   callbackQuery: any;
 };
@@ -14,6 +15,7 @@ type ExtendedActionContext = Context & {
 const AVAILABLE_DURATIONS = [60, 120, 180, 300]; // 1, 2, 3, 5 минут
 
 export async function handleDurationMenu(ctx: ExtendedActionContext) {
+  const t = i18next.t.bind(i18next);
   // 1. Извлекаем индекс цикла из колбэка
   const cycleIndex = parseInt(ctx.match[1]);
 
@@ -23,7 +25,7 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
 
   const cycle = CYCLES[cycleIndex];
 
-  const cycleName = cycle.nameKey.split(" ")[0];
+  const translatedCycleName = t(cycle.nameKey);
 
   // 2. Генерируем кнопки выбора продолжительности
   const durationButtons = AVAILABLE_DURATIONS.map((duration) => {
@@ -33,10 +35,17 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
     // Этот формат соответствует вашему старому регулярному выражению!
     const callbackData = `start_cycle_${cycleIndex}_${duration}`;
 
-    return Markup.button.callback(`${minutes} мин`, callbackData);
+    // ⭐️ Переводим текст кнопки, используя minutes и интерполяцию
+    const buttonText = t("menu.duration_minutes", { count: minutes });
+    // В вашем i18n файле это может выглядеть как: "duration_minutes": "{{count}} мин"
+
+    return Markup.button.callback(buttonText, callbackData);
   });
 
-  const backButton = Markup.button.callback("⬅️ Назад", "back_to_main_menu");
+  const backButton = Markup.button.callback(
+    t("button.back"),
+    "back_to_main_menu"
+  );
 
   // 🚀 ОБЪЕДИНЯЕМ КНОПКИ:
   // Мы хотим, чтобы кнопки продолжительности были в одном ряду, а "Назад" - в отдельном.
@@ -48,14 +57,13 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
     [backButton], // Кнопка "Назад" в отдельный ряд
   ]);
 
-  const finalText = formatAsCodeBlock(
-    `⏱️ ${cycle.nameKey}.
-    ${cycle.pattern}
-
-    <b>${cycle.descriptionKey}</b>
-
-    Какую продолжительность вы выберете?`
-  );
+  const finalText =
+    // ⭐️ Используем переводы для всех частей
+    t("menu.duration_prompt", {
+      cycleName: translatedCycleName, // Переведенное имя цикла
+      pattern: cycle.pattern, // Паттерн, вероятно, не переводится
+      description: t(cycle.descriptionKey), // Переводим описание
+    });
 
   // 3. Отправляем новое сообщение с меню продолжительности
   // (Используем reply, так как editMessageReplyMarkup удалил кнопки в старом сообщении)
@@ -64,6 +72,10 @@ export async function handleDurationMenu(ctx: ExtendedActionContext) {
   // 4. Удаляем предыдущее сообщение с кнопками
   await completeCallbackAction(
     ctx,
-    `Выбран цикл "${cycleName}". Выберите продолжительность.`
+    // ⭐️ Переводим сообщение для answerCbQuery
+    t("message.cycle_selected", {
+      cycleName: translatedCycleName,
+      replace: translatedCycleName,
+    })
   );
 }

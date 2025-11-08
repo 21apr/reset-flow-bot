@@ -1,8 +1,8 @@
-import { Context } from "telegraf";
 import { CYCLES } from "../features/breathing/cycles";
 import { runBreathingCycle } from "../features/breathing/runner";
+import { MyContext } from "../features/general/types/types";
 
-type ExtendedActionContext = Context & { match: RegExpMatchArray };
+type ExtendedActionContext = MyContext & { match: RegExpMatchArray };
 
 // Универсальный обработчик для всех циклов
 export async function handleBreathingCycleStart(ctx: ExtendedActionContext) {
@@ -23,15 +23,6 @@ export async function handleBreathingCycleStart(ctx: ExtendedActionContext) {
 
   // 2. Отвечаем на callback
   await ctx.answerCbQuery(`Начинаем практику "${cycleName}"...`);
-
-  // 3. Удаляем кнопки
-  try {
-    // Чтобы избежать ошибки типизации, используйте {} и добавьте 'as any'
-    // или используйте undefined, как вы делали.
-    await ctx.editMessageReplyMarkup(undefined);
-  } catch (error) {
-    console.error("Не удалось удалить кнопки:", error);
-  }
 
   // 4. Запускаем тренажер
   try {

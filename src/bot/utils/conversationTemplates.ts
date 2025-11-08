@@ -1,5 +1,6 @@
 import { Context } from "telegraf";
 import { sendBreathingMenu } from "../keyboards/getBreathingKeyboard";
+import i18next from "../../shared/i18n/i18n";
 
 /**
  * Унифицированный шаблон для отправки меню выбора дыхательных циклов.
@@ -10,8 +11,9 @@ export async function sendCycleMenu(
   ctx: Context,
   introductoryText: string
 ): Promise<void> {
+  const t = i18next.t.bind(i18next);
   // Получаем унифицированный объект клавиатуры
-  const keyboard = sendBreathingMenu();
+  const keyboard = sendBreathingMenu(t);
 
   // Отправляем сообщение, объединяя контекстный текст и кнопки
   await ctx.reply(introductoryText, keyboard);

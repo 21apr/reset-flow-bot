@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { Telegraf, Context } from "telegraf";
+import { Telegraf, session } from "telegraf";
 import { ParseMode } from "telegraf/typings/core/types/typegram";
 import dotenv from "dotenv";
 import { ITelegramUser } from "./db/mongoDB/interfaces/User.interface";
@@ -13,6 +13,9 @@ import { connectDB } from "./db/mongoDB/connectDB";
 import { setBotCommands } from "./bot/utils/commands";
 import { handleArbitraryText } from "./bot/features/general/handlers/textHandler";
 import { initI18n } from "./shared/i18n/i18n";
+import { MyContext, MySession } from "./bot/features/general/types/types";
+import { i18nMiddleware } from "./shared/i18n/i18nMiddleware";
+import { feedbackHandler } from "./bot/features/general/commands/feedback";
 
 // Загрузка переменных окружения
 dotenv.config();
@@ -21,6 +24,8 @@ dotenv.config();
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 // Вы можете выбрать модель, например, 'gemini-2.5-flash'
 const model = "gemini-2.5-flash";
+
+const app = express();
 
 // 1. Проверка и типизация переменных окружения
 // ---------------------------------------------
@@ -41,13 +46,21 @@ connectDB();
 
 async function startBot() {
   await initI18n();
-  const bot = new Telegraf<Context>(process.env.BOT_TOKEN!, {
+  const bot = new Telegraf<MyContext>(process.env.BOT_TOKEN!, {
     // Убедитесь, что настройка parse_mode находится внутри объекта telegram
     telegram: {
       parse_mode: "HTML", // Должен быть 'HTML' или 'MarkdownV2'
     },
   } as any);
-  const app = express();
+
+  bot.use(
+    session<MySession, MyContext>({
+      defaultSession: () => ({}), // Обязательно для In-memory сессии
+    })
+  );
+
+  // ⭐️ Подключаем i18n Middleware сразу после сессии
+  bot.use(i18nMiddleware);
 
   await setBotCommands(bot);
 
@@ -90,6 +103,7 @@ async function startBot() {
       id: String(ctx.from.id),
       username: ctx.from.username,
       first_name: ctx.from.first_name || "друг",
+      language_code: ctx.from.language_code || "en",
     };
 
     try {
@@ -109,30 +123,12 @@ async function startBot() {
   });
 
   // Обработчик команды /feedback
-  bot.command("feedback", async (ctx) => {
-    const messageText = `
-<b>💬 Обратная связь</b>
-
-Чтобы отправить мне личное сообщение, просто нажмите на эту ссылку:
-
-<a href="https://t.me/LARINALAB">Написать в личные сообщения</a>
-
-Буду рад вашим вопросам или предложениям!
-`;
-
-    await ctx.reply(messageText, {
-      parse_mode: "HTML", // Обязательно для форматирования ссылки
-      link_preview_options: {
-        is_disabled: true,
-      },
-    });
-  });
+  bot.command("feedback", feedbackHandler);
 
   // // --- Обработчик для кнопок (Запуск тренажера) ---
 
   bot.action(/^select_cycle_(\d+)$/, handleDurationMenu);
   bot.action(/^start_cycle_(\d+)_(\d+)$/, handleBreathingCycleStart as any);
-
   bot.action("back_to_main_menu", handleBackToMainMenu);
 
   bot.on("text", async (ctx) => {
