@@ -1,14 +1,12 @@
-// src/models/User.model.ts
-import mongoose, { Schema, Model } from "mongoose";
-import { IUser } from "../interfaces/User.interface"; // Импортируем созданный интерфейс
+import mongoose, { Schema } from "mongoose";
+import { IUser } from "../interfaces/User.interface";
 
-// 1. Определение Схемы
 const UserSchema: Schema = new Schema({
   telegramId: {
     type: String,
     required: true,
-    unique: true, // Гарантирует, что ID не дублируется
-    index: true, // Индексируем для быстрого поиска
+    unique: true,
+    index: true,
   },
   username: {
     type: String,
@@ -24,18 +22,12 @@ const UserSchema: Schema = new Schema({
   },
   totalBreathingSeconds: {
     type: Number,
-    default: 0, // Важно: устанавливаем 0 для новых пользователей
+    default: 0,
   },
   language: {
     type: String,
     default: "en",
   },
 });
-
-// 2. Создание Модели с типизацией
-// Модель типизируется с помощью IUser (интерфейс документа)
-// const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
-
-// export default User;
 
 export default mongoose.model<IUser>("User", UserSchema);

@@ -7,13 +7,10 @@ export async function startHandler(ctx: MyContext, isNewUser: boolean) {
   const userName = ctx.from?.first_name || t("placeholder.friend");
 
   const translationKey = isNewUser
-    ? "message.greeting.welcome_new" // Ключ для нового пользователя
-    : "message.greeting.welcome_back"; // Ключ для вернувшегося пользователя
+    ? "message.greeting.welcome_new"
+    : "message.greeting.welcome_back";
 
-  // Используем t() с интерполяцией
-  // Передаем имя пользователя (userName) в качестве переменной перевода
   const greeting = t(translationKey, { userName: userName });
 
-  // Вызываем унифицированный шаблон
   await sendCycleMenu(ctx, greeting);
 }

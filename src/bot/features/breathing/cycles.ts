@@ -1,39 +1,33 @@
 import { Context } from "telegraf";
 import { getTranslator } from "../../../shared/i18n/getTranslator";
 
-// Тип, описывающий одну фазу цикла
-export type BreathingPhase = "Вдох" | "Пауза_до" | "Выдох" | "Пауза_после"; // Эти типы лучше оставить на английском в коде, если это технические идентификаторы
+export type BreathingPhase = "In" | "Hold_In" | "Out" | "Hold_Out";
 
-// Интерфейс для хранения данных о конкретном цикле
 export interface Cycle {
-  nameKey: string; // Ключ для имени (Расслабление, Энергия и т.д.)
+  nameKey: string;
   pattern: string;
-  descriptionKey: string; // Ключ для описания
+  descriptionKey: string;
   phases: {
     type: BreathingPhase;
-    duration: number; // Длительность в секундах
+    duration: number;
     emoji: string;
-    textKey: string; // Ключ для текста фазы (ВДОХ, ПАУЗА и т.д.)
+    textKey: string;
   }[];
 }
-
-/**
- * Заложенные шаблоны дыхательных циклов (используют ключи i18n).
- */
 export const CYCLES: Cycle[] = [
   {
     nameKey: "cycle.relaxation.name",
     pattern: "4-7-8",
     descriptionKey: "cycle.relaxation.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in_slow" },
+      { type: "In", duration: 4, emoji: "⬆️", textKey: "phase.in_slow" },
       {
-        type: "Пауза_до",
+        type: "Hold_In",
         duration: 7,
         emoji: "⏸️",
         textKey: "phase.hold_breath",
       },
-      { type: "Выдох", duration: 8, emoji: "⬇️", textKey: "phase.out_smooth" },
+      { type: "Out", duration: 8, emoji: "⬇️", textKey: "phase.out_smooth" },
     ],
   },
   {
@@ -41,8 +35,8 @@ export const CYCLES: Cycle[] = [
     pattern: "4-0-6-0",
     descriptionKey: "cycle.anxiety_relief.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in_nose" },
-      { type: "Выдох", duration: 6, emoji: "⬇️", textKey: "phase.out_mouth" },
+      { type: "In", duration: 4, emoji: "⬆️", textKey: "phase.in_nose" },
+      { type: "Out", duration: 6, emoji: "⬇️", textKey: "phase.out_mouth" },
     ],
   },
   {
@@ -50,11 +44,11 @@ export const CYCLES: Cycle[] = [
     pattern: "4-4-4-4",
     descriptionKey: "cycle.concentration.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in" },
-      { type: "Пауза_до", duration: 4, emoji: "⏸️", textKey: "phase.hold" },
-      { type: "Выдох", duration: 4, emoji: "⬇️", textKey: "phase.out" },
+      { type: "In", duration: 4, emoji: "⬆️", textKey: "phase.in" },
+      { type: "Hold_In", duration: 4, emoji: "⏸️", textKey: "phase.hold" },
+      { type: "Out", duration: 4, emoji: "⬇️", textKey: "phase.out" },
       {
-        type: "Пауза_после",
+        type: "Hold_Out",
         duration: 4,
         emoji: "⏸️",
         textKey: "phase.pause_rest",
@@ -66,8 +60,8 @@ export const CYCLES: Cycle[] = [
     pattern: "5-0-5-0",
     descriptionKey: "cycle.balance.description",
     phases: [
-      { type: "Вдох", duration: 5, emoji: "⬆️", textKey: "phase.in" },
-      { type: "Выдох", duration: 5, emoji: "⬇️", textKey: "phase.out" },
+      { type: "In", duration: 5, emoji: "⬆️", textKey: "phase.in" },
+      { type: "Out", duration: 5, emoji: "⬇️", textKey: "phase.out" },
     ],
   },
   {
@@ -75,8 +69,8 @@ export const CYCLES: Cycle[] = [
     pattern: "1-0-1-0",
     descriptionKey: "cycle.energy.description",
     phases: [
-      { type: "Выдох", duration: 1, emoji: "💨", textKey: "phase.out_sharp" },
-      { type: "Вдох", duration: 1, emoji: "⬆️", textKey: "phase.in_passive" },
+      { type: "Out", duration: 1, emoji: "💨", textKey: "phase.out_sharp" },
+      { type: "In", duration: 1, emoji: "⬆️", textKey: "phase.in_passive" },
     ],
   },
   {
@@ -84,8 +78,8 @@ export const CYCLES: Cycle[] = [
     pattern: "4-0-8-0",
     descriptionKey: "cycle.irritation_release.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in_nose" },
-      { type: "Выдох", duration: 8, emoji: "🫧", textKey: "phase.out_sound" },
+      { type: "In", duration: 4, emoji: "⬆️", textKey: "phase.in_nose" },
+      { type: "Out", duration: 8, emoji: "🫧", textKey: "phase.out_sound" },
     ],
   },
   {
@@ -93,11 +87,11 @@ export const CYCLES: Cycle[] = [
     pattern: "4-2-6-2",
     descriptionKey: "cycle.creative_flow.description",
     phases: [
-      { type: "Вдох", duration: 4, emoji: "⬆️", textKey: "phase.in" },
-      { type: "Пауза_до", duration: 2, emoji: "⏸️", textKey: "phase.hold_in" },
-      { type: "Выдох", duration: 6, emoji: "⬇️", textKey: "phase.out" },
+      { type: "In", duration: 4, emoji: "⬆️", textKey: "phase.in" },
+      { type: "Hold_In", duration: 2, emoji: "⏸️", textKey: "phase.hold_in" },
+      { type: "Out", duration: 6, emoji: "⬇️", textKey: "phase.out" },
       {
-        type: "Пауза_после",
+        type: "Hold_Out",
         duration: 2,
         emoji: "⏸️",
         textKey: "phase.pause_rest",

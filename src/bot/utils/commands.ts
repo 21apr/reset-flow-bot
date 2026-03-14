@@ -3,7 +3,6 @@ import { Telegraf } from "telegraf";
 import { MyContext } from "../features/general/types/types";
 
 export async function setBotCommands(bot: Telegraf<MyContext>) {
-  // Список поддерживаемых языков
   const languages = ["en", "ru", "he"];
 
   for (const lng of languages) {

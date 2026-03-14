@@ -12,11 +12,10 @@ export function connectDB() {
   mongoose
     .connect(MONGODB_TOKEN)
     .then(() => {
-      console.log("✅ Подключено к MongoDB");
+      console.log("✅ Connected to MongoDB");
     })
     .catch((err: Error) => {
-      console.error("❌ Ошибка подключения к MongoDB:", err.message);
-      // Может быть полезно завершить процесс, если БД необходима
+      console.error("❌ MongoDB connection error:", err.message);
       process.exit(1);
     });
 }
