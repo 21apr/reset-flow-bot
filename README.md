@@ -12,7 +12,6 @@ Hosted on Render with automated CI/CD.
 *   **Telegraf**: Telegram bot framework.
 *   **Mongoose**: MongoDB object modeling tool.
 *   **i18next**: Internationalization framework.
-*   **GoogleGenAI**: Gemini API for AI integration.
 *   **MongoDB**: Database for storing user data.
 
 ## Features
@@ -48,7 +47,7 @@ Hosted on Render with automated CI/CD.
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/21apr/reset-flow-bot.git](https://github.com/21apr/reset-flow-bot.git)
+   git clone https://github.com/21apr/reset-flow-bot.git
    cd reset-flow-bot
    ```
 
