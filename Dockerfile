@@ -14,6 +14,6 @@ COPY package*.json ./
 RUN npm install --production
 
 COPY --from=builder /app/dist ./dist
-COPY locales ./locales
+COPY src/shared/i18n/locales src/shared/i18n/locales
 
 CMD ["node", "dist/index.js"]

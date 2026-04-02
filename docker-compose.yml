@@ -19,3 +19,6 @@ services:
       - .env
     environment:
       MONGODB_URI: mongodb://${MONGO_DB_ADMIN_USER}:${MONGO_DB_ADMIN_PASSWORD}@mongodb:27017/reset_flow?authSource=admin
+
+volumes:
+  mongo_data:
