@@ -3,19 +3,20 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export function connectDB() {
-  const MONGODB_TOKEN: string | undefined = process.env.MONGODB_TOKEN;
-  if (!MONGODB_TOKEN) {
-    throw new Error("❌ MONGODB_TOKEN не найден в переменных окружения.");
+export async function connectDB() {
+  const dbUri = process.env.MONGODB_URI;
+
+  if (!dbUri) {
+    throw new Error("❌ MONGODB_URI not found in environment variables.");
   }
 
-  mongoose
-    .connect(MONGODB_TOKEN)
-    .then(() => {
-      console.log("✅ Connected to MongoDB");
-    })
-    .catch((err: Error) => {
-      console.error("❌ MongoDB connection error:", err.message);
-      process.exit(1);
-    });
+  try {
+    await mongoose.connect(dbUri);
+    console.log("✅ Connected to MongoDB (Local Docker Instance)");
+  } catch (err) {
+    const error = err as Error;
+    console.error("❌ MongoDB connection error:", error.message);
+
+    process.exit(1);
+  }
 }
