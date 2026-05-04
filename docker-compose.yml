@@ -1,26 +1,15 @@
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb_reset_flow
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_DB_ADMIN_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_DB_ADMIN_PASSWORD}
-    ports:
-      - "27017:27017" # Expose the default MongoDB port
-    volumes:
-      - mongo_data:/data/db
-
   bot:
     build: .
     container_name: reset_flow_bot
     restart: always
-    depends_on:
-      - mongodb
+    networks:
+      - global_network
     env_file:
       - .env
     environment:
-      MONGODB_URI: mongodb://${MONGO_DB_ADMIN_USER}:${MONGO_DB_ADMIN_PASSWORD}@mongodb:27017/reset_flow?authSource=admin
+      MONGODB_URI: mongodb://${MONGO_DB_ADMIN_USER}:${MONGO_DB_ADMIN_PASSWORD}@shared_mongodb:27017/reset_flow?authSource=admin
 
-volumes:
-  mongo_data:
+networks:
+  global_network:
+    external: true
